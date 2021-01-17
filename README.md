@@ -43,6 +43,7 @@
 - [Features](#features)
 - [Getting started](#getting-started)
 - [Configuration](docs/configuration.md)
+- [Custom Services](docs/custom-services/custom-services.md)
 - [Tips & tricks](docs/tips-and-tricks.md)
 - [Roadmap](#roadmap)
 - [Development](docs/development.md)
