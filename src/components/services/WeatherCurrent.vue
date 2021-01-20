@@ -18,8 +18,8 @@ export default {};
       :style="`background-color:${item.background};`"
       :class="item.class"
     >
-        <div class="card-content">
-            <div class="media" v-if="weather">
+        <div class="card-content" v-if="weather">
+            <div class="media">
                 <div class="media-left">
                     <figure class="image is-48x48">
                         <img :src="weather.icon.url" :alt="weather.icon.alt" />
@@ -33,53 +33,42 @@ export default {};
                                 <p class="description">{{ weather.description }}</p>
                             </div>
                         </div>
-                        <div class="level-item" v-if="weather.alerts">
-                            <i class="fas fa-exclamation-triangle alert-icon" @click="toggleModal"></i>
-                        </div>
                         <div class="level-item has-text-centered">
                             <div>
                                 <p class="heading">temp</p>
-                                <p class="title">{{ weather.temperature}} {{ getUnit('temperature') }}</p>
+                                <p class="title">{{ weather.temperature}} <span class="unit">{{ getUnit('temperature') }}</span></p>
                             </div>
                         </div>
                         <div class="level-item has-text-centered">
                             <div>
                                 <p class="heading">Hum</p>
-                                <p class="title">{{ weather.humidity}} {{ getUnit('humidity') }}</p>
+                                <p class="title">{{ weather.humidity}} <span class="unit">{{ getUnit('humidity') }}</span></p>
+                            </div>
+                        </div>
+                        <div class="level-item has-text-centered">
+                            <div>
+                                <p class="heading">press</p>
+                                <p class="title">{{ weather.pressure}} <span class="unit">{{ getUnit('pressure') }}</span></p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <i class="fas fa-exclamation-triangle alert-icon" v-if="weather.alerts" @click="toggleModal"></i>
         </div>
     </div>
-    <!-- modal for showing alerts info -->
-    <div class="modal" v-if="weather && weather.alerts" :class="{'is-active': showModal}">
-        <div class="modal-background" @click="toggleModal"></div>
-        <div class="modal-content">
-            <div class="box">
-                <p class="title"><i class="fas fa-exclamation-triangle"></i> {{ item.alertsTitle || 'Alerts' }}</p>
-                <div v-for="(alert, index) in weather.alerts" :key="index" class="block alert">
-                    <div class="alert-content">
-                        <p>{{alert.event}}</p>
-                        <p>{{alert.sender}}</p>
-                        <p><b>{{alert.description}}</b></p>
-                    </div>
-                    <div>
-                        <p class="alert-date">{{ formatDateShort(alert.start * 1000) }}</p>
-                        <p class="alert-date">{{ formatDateShort(alert.end * 1000) }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button class="modal-close is-large" aria-label="close" @click="toggleModal"></button>
-    </div>
+    <WeatherAlerts v-if="weather && weather.alerts" :showModal="showModal" :item="item" :alerts="weather.alerts" v-on:toggle-modal="toggleModal"></WeatherAlerts>
   </div>
 </template>
 
 <script>
+import WeatherAlerts from './weather/components/alerts.vue';
+
 export default {
-  name: "Weather",
+  name: "WeatherCurrent",
+  components: {
+      WeatherAlerts
+  },
   props: {
     item: Object,
   },
@@ -90,17 +79,20 @@ export default {
           standard: {
               temperature: 'ºK',
               speed: 'm/s',
-              humidity: '%'
+              humidity: '%',
+              pressure: 'hPa'
           },
           metric: {
               temperature: 'ºC',
               speed: 'm/s',
-              humidity: '%'
+              humidity: '%',
+              pressure: 'hPa'
           },
           imperial: {
               temperature: 'ºF',
               speed: 'mph',
-              humidity: '%'
+              humidity: '%',
+              pressure: 'hPa'
           }
       }
     }
@@ -110,27 +102,14 @@ export default {
   },
   methods: {
     async getWeather() {
-    // loads weather provider file and calls getCurrentWeather function:
-    this.weather = await (await import(`./WeatherDataProviders/${this.item.provider.name}.js`)).getCurrentWeather(this.item.provider.params);
+        // loads weather provider file and calls getCurrentWeather function:
+        this.weather = await (await import(`./weather/dataProviders/${this.item.provider.name}.js`)).getCurrentWeather(this.item.provider.params);
+        if (this.item.refreshInterval) setTimeout(this.getMessage, this.item.refreshInterval);
     },
 
     toggleModal() {
         this.showModal = !this.showModal;
-    },
-
-    formatDateShort(ts) {
-        let date = new Date(ts);
-        return (date).toLocaleDateString(
-            date,
-            {
-                weekday: 'short',
-                year: 'numeric',
-                month: '2-digit',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }
-        );
+        if (!this.showModal && this.item.dismissAlertsAfterShown) delete this.weather.alerts;
     },
 
     getUnit(param) {
@@ -157,21 +136,20 @@ export default {
     text-transform: capitalize;
 }
 
-.alert {
-    display: flex;
-    justify-content: space-between;
-}
-
-.alert-content {
-    max-width: 26rem;
-}
-
 .alert-icon {
-    color: #ec6d4c;
     cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    background: #ec6d4c;
+    color: white;
+    padding: 2rem 0.3rem 0rem 0.3rem;
+    border-radius: 0px 5px 5px 0px;
 }
 
-.alert-date {
-    text-align: right;
+.unit {
+    font-size: small;
+    font-weight: normal;
 }
 </style>
