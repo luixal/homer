@@ -66,6 +66,9 @@ export default {
 
 
 <style scoped lang="scss">
+.title {
+    color: black !important;
+}
 
 .alert {
     display: flex;

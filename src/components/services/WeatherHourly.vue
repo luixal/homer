@@ -111,6 +111,10 @@ export default {
     margin-top: -0.5rem;
 }
 
+.heading {
+    color: var(--text-subtitle)
+}
+
 .alert-icon {
     cursor: pointer;
     position: absolute;

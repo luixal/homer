@@ -132,8 +132,16 @@ export default {
     max-width: 9rem;
 }
 
+.description {
+    color: var(--text-subtitle)
+}
+
 .description:first-letter {
     text-transform: capitalize;
+}
+
+.heading {
+    color: var(--text-subtitle)
 }
 
 .alert-icon {
