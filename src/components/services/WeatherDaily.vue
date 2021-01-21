@@ -18,13 +18,13 @@ export default {};
       :style="`background-color:${item.background};`"
       :class="item.class"
     >
-        <div class="card-content" :class="{ 'has-alerts': weather.alerts }" v-if="weather && weather.hourly">
+        <div class="card-content" :class="{ 'has-alerts': weather.alerts }" v-if="weather && weather.daily">
             <div class="level level-weather-multiple">
-                <div class="level-item has-text-centered" v-for="(dailyWeather, index) in weather.hourly" :key="index">
+                <div class="level-item has-text-centered" v-for="(dailyWeather, index) in weather.daily" :key="index">
                     <div>
                         <p class="heading">
-                            <span v-if="item.showHours" class="is-family-sans-serif">{{ formatHourShort(dailyWeather.dt * 1000) }}</span>
-                            <span v-if="item.showTemperatures" class="is-family-sans-serif"> {{ dailyWeather.temperature }}{{ getUnit('temperature') }}</span>
+                            <span v-if="item.showDays">{{ formatDayShort(dailyWeather.dt * 1000) }}</span>
+                            <span v-if="item.showTemperatures" class="is-family-sans-serif"> {{ dailyWeather.temperature.min }} / {{ dailyWeather.temperature.max }}{{ getUnit('temperature') }}</span>
                         </p>
                         <figure class="image is-48x48">
                             <img :src="dailyWeather.icon.url" :alt="dailyWeather.icon.alt" />
@@ -43,7 +43,7 @@ export default {};
 import WeatherAlerts from './weather/components/alerts.vue';
 
 export default {
-  name: "WeatherHourly",
+  name: "WeatherDaily",
   components: {
       WeatherAlerts
   },
@@ -77,8 +77,8 @@ export default {
   },
   methods: {
     async getWeather() {
-        // loads weather provider file and calls getHourlyWeather function:
-        this.weather = await (await import(`./weather/dataProviders/${this.item.provider.name}.js`)).getHourlyWeather(this.item.provider.params);
+        // loads weather provider file and calls getDailyWeather function:
+        this.weather = await (await import(`./weather/dataProviders/${this.item.provider.name}.js`)).getDailyWeather(this.item.provider.params);
         if (this.item.refreshInterval) setTimeout(this.getMessage, this.item.refreshInterval);
     },
 
@@ -87,8 +87,9 @@ export default {
         if (!this.showModal && this.item.dismissAlertsAfterShown) delete this.weather.alerts;
     },
 
-    formatHourShort(ts) {
-        return `${new Date(ts).getHours()}h`;
+    formatDayShort(ts) {
+        let d = new Date(ts);
+        return d.toLocaleString(d, { weekday: 'short' }).slice(0, -1);
     },
 
     getUnit(param) {

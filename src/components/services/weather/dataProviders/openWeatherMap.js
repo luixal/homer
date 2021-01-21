@@ -14,6 +14,25 @@ function transformWeatherBlockData(data) {
     return result;
 }
 
+function transformWeatherDailyData(data) {
+    // console.log(new Date(data.dt * 1000));
+    let result = {
+        dt: data.dt,
+        icon: {
+            url: `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`,
+            alt: `${data.weather[0].main} icon`
+        },
+        description: data.weather[0].description,
+        temperature: {
+            min: data.temp.min,
+            max: data.temp.max
+        },
+        humidity: data.humidity,
+        pressure: data.pressure
+    };
+    return result;
+}
+
 // should return:
 // {
     // dt: 1610740800
@@ -78,14 +97,19 @@ export async function getCurrentWeather(config) {
 }
 
 export async function getHourlyWeather(config) {
-    // how many hours?
     config.exclude = 'minutely,daily';
     let weather = await fetchWeather(config);
-    // weather.hourly.splice(0, 8).map( hour => console.log(new Date(hour.dt * 1000)) );
-    // return weather.hourly.splice(0, config.hoursCount || 5).map( transformWeatherBlockData );
     return {
         hourly: weather.hourly.splice(0, config.hoursCount || 5).map( transformWeatherBlockData ),
         alerts: weather.alerts
     }
-    // return transformCurrentWeatherData(weather);
+}
+
+export async function getDailyWeather(config) {
+    config.exclude = 'minutely,hourly';
+    let weather = await fetchWeather(config);
+    return {
+        daily: weather.daily.splice(0, config.daysCount || 5).map( transformWeatherDailyData ),
+        alerts: weather.alerts
+    }
 }

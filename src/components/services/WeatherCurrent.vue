@@ -18,7 +18,7 @@ export default {};
       :style="`background-color:${item.background};`"
       :class="item.class"
     >
-        <div class="card-content" v-if="weather">
+        <div class="card-content" :class="{ 'has-alerts': weather.alerts }" v-if="weather">
             <div class="media">
                 <div class="media-left">
                     <figure class="image is-48x48">
@@ -36,19 +36,19 @@ export default {};
                         <div class="level-item has-text-centered">
                             <div>
                                 <p class="heading">temp</p>
-                                <p class="title">{{ weather.temperature}} <span class="unit">{{ getUnit('temperature') }}</span></p>
+                                <p class="title is-family-sans-serif">{{ weather.temperature}} <span class="unit">{{ getUnit('temperature') }}</span></p>
                             </div>
                         </div>
                         <div class="level-item has-text-centered">
                             <div>
                                 <p class="heading">Hum</p>
-                                <p class="title">{{ weather.humidity}} <span class="unit">{{ getUnit('humidity') }}</span></p>
+                                <p class="title is-family-sans-serif">{{ weather.humidity}} <span class="unit">{{ getUnit('humidity') }}</span></p>
                             </div>
                         </div>
                         <div class="level-item has-text-centered">
                             <div>
                                 <p class="heading">press</p>
-                                <p class="title">{{ weather.pressure}} <span class="unit">{{ getUnit('pressure') }}</span></p>
+                                <p class="title is-family-sans-serif">{{ weather.pressure}} <span class="unit">{{ getUnit('pressure') }}</span></p>
                             </div>
                         </div>
                     </div>
@@ -154,6 +154,11 @@ export default {
     color: white;
     padding: 2rem 0.3rem 0rem 0.3rem;
     border-radius: 0px 5px 5px 0px;
+}
+
+.card-content.has-alerts {
+    padding-left: 0.5rem;
+    padding-right: 2rem;
 }
 
 .unit {
